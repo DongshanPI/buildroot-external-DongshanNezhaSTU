@@ -1,0 +1,58 @@
+name: Auto Build AW-OL D1/D1S Buildroot system.
+
+on:
+  push:
+    tags:
+       - '*'
+       
+jobs:
+  build-all:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        config: [nezha-d1_defconfig ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: buildroot-external-DongshanNezhaSTU
+      
+      - uses: actions/checkout@v2
+        with:
+          repository: 100askTeam/buildroot_aw-ol
+          ref: master
+          path: buildroot
+          
+      - name: Install buildroot dependencies
+        run: sudo apt install debianutils sed make binutils build-essential gcc g++ bash patch gzip bzip2 perl tar cpio unzip rsync file bc git mtools android-tools-mkbootimg
+        
+      - name: Configure Buildroot
+        run: make -C buildroot BR2_EXTERNAL=../buildroot-external-DongshanNezhaSTU O=../output ${{ matrix.config }}
+        
+      - name: Build Buildroot
+        run: make -C buildroot BR2_EXTERNAL=../buildroot-external-DongshanNezhaSTU O=../output
+        
+      - name: Build toolchain
+        run: make -C buildroot BR2_EXTERNAL=../buildroot-external-DongshanNezhaSTU O=../output sdk        
+        
+      - name: Compress sdcard.img
+        run: gzip -9 output/images/sdcard.img
+                 
+      - run: tar -czvf ${{ matrix.config }}.tar.gz   output/images/*         
+
+      - name: Store images
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.config }}
+          path: ${{ matrix.config }}.tar.gz
+          
+      - run: ls -la
+      
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{ matrix.config }}.tar.gz
+            
+      - run: ls -la            
+          

@@ -1,0 +1,2 @@
+source "$BR2_EXTERNAL_D1_PATH/package/lvgl-desktop/Config.in"
+source "$BR2_EXTERNAL_D1_PATH/package/myir-hmi-gui/Config.in"
