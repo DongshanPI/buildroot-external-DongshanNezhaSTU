@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        config: [nezha-d1_defconfig ]
+        config: [dongshannezhaSTU-core_defconfig, nezha-d1_defconfig ]
     steps:
       - uses: actions/checkout@v2
         with:
